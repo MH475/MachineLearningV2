@@ -233,20 +233,22 @@ with st.sidebar:
     st.markdown("*Pre-evaluation de sinistre automobile par IA*")
     st.markdown("---")
     
-    st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-label">Modele</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-value">MobileNet-V2</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="sidebar-card">
+        <div class="sidebar-label">Modele</div>
+        <div class="sidebar-value">MobileNet-V2</div>
+    </div>
     
-    st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-label">Classes detectees</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sidebar-value">{", ".join(id2label.values())}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    <div class="sidebar-card">
+        <div class="sidebar-label">Classes detectees</div>
+        <div class="sidebar-value">{", ".join(id2label.values())}</div>
+    </div>
     
-    st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-label">Device</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sidebar-value">{str(DEVICE).upper()}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    <div class="sidebar-card">
+        <div class="sidebar-label">Device</div>
+        <div class="sidebar-value">{str(DEVICE).upper()}</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("### 📊 Performance")
