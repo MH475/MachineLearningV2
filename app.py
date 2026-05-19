@@ -126,21 +126,16 @@ if uploaded_file is not None:
         "⚠️ Pre-evaluation automatique — l'avis d'un expert reste necessaire "
         "pour la validation du sinistre."
     )
-
+ 
     with st.expander("Comment ca marche ?"):
-    st.markdown(
-        """
-        Cette application utilise un modele EfficientNet-B0 entraine pour distinguer deux classes :
-        **fire** et **no_fire**.
+        st.markdown(
+            """
+            Cette application utilise un modele EfficientNet-B0 entraine pour distinguer deux classes :
+            **damage** et **no_damage**.
  
-        1. L'image uploadée est redimensionnée en 224x224 pixels.
-        2. Le modele calcule une probabilité pour chaque classe.
-        3. La classe avec la probabilité la plus élevée est affichée comme prédiction.
-        4. GradCAM met en évidence les zones de l'image qui ont le plus influencé la décision.
- 
-        Important : ce système peut se tromper, notamment avec des couchers de soleil,
-        de la brume, de la fumée ambiguë ou des lumières chaudes.
-        """
-    )
-else:
-    st.info("👆 Uploadez une image pour commencer l'analyse.")
+            1. L'image uploadée est redimensionnée en 224x224 pixels.
+            2. Le modele calcule une probabilité pour chaque classe.
+            3. La classe avec la probabilité la plus élevée est affichée comme prédiction.
+            4. GradCAM met en évidence les zones de l'image qui ont le plus influencé la décision.
+            """
+        )
