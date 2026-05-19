@@ -122,7 +122,7 @@ if uploaded_file is not None:
                  use_container_width=True)
 
     st.markdown("---")
-    st.warning(
+    st.error(
         "⚠️ Pre-evaluation automatique — l'avis d'un expert reste necessaire "
         "pour la validation du sinistre."
     )
