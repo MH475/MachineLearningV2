@@ -448,8 +448,7 @@ else:
 # ============================================================
 st.markdown("""
 <div class="footer">
-    Made with ❤️ using <strong>Streamlit</strong> & <strong>PyTorch</strong>
+    Made by Malo Héry & Jules Boiziau using <strong>Streamlit</strong> & <strong>PyTorch</strong>
     • Modele <strong>MobileNet-V2</strong> fine-tune sur Car Damage Dataset
-    • <a href="https://github.com/MH475/MachineLearningV2" target="_blank" style="color: #0A8F6E;">Code source</a>
-</div>
+    </div>
 """, unsafe_allow_html=True)
