@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "/content/model_weights"  # chemin ABSOLU (corrige le bug Colab)
+MODEL_PATH = "./model_weights"  # chemin ABSOLU (corrige le bug Colab)
 
 # Pipeline de preprocessing
 val_transform = transforms.Compose([
