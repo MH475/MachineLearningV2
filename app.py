@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "./model_weights"  # chemin ABSOLU (corrige le bug Colab)
+MODEL_PATH = "./model_weights"
 
 # Pipeline de preprocessing
 val_transform = transforms.Compose([
@@ -39,7 +39,7 @@ class ClassifierWrapper(torch.nn.Module):
 def load_model():
     import os
     if not os.path.exists(MODEL_PATH):
-        st.error(f"Modele introuvable a {MODEL_PATH}. Avez-vous execute la cellule de sauvegarde du modele ?")
+        st.error(f"Modele introuvable a {MODEL_PATH}.")
         st.stop()
     model = AutoModelForImageClassification.from_pretrained(MODEL_PATH)
     model.to(DEVICE)
@@ -49,7 +49,21 @@ def load_model():
 model = load_model()
 id2label = model.config.id2label
 
+# ------------------------------------------------------------------
+# Helper : indicateur visuel de confiance (point 1)
+# ------------------------------------------------------------------
+def get_confidence_info(confidence):
+    """Retourne (emoji, niveau, couleur) selon le score de confiance."""
+    if confidence >= 85:
+        return "🟢", "Confiance elevee", "#28a745"
+    elif confidence >= 65:
+        return "🟡", "Confiance moderee", "#ffc107"
+    else:
+        return "🔴", "Confiance faible", "#dc3545"
+
+# ------------------------------------------------------------------
 # Sidebar
+# ------------------------------------------------------------------
 st.sidebar.title("A propos")
 st.sidebar.info(
     "Pre-evaluation automatique — l'avis d'un expert reste necessaire "
@@ -60,13 +74,47 @@ st.sidebar.markdown("**Modele :** MobileNet-V2")
 st.sidebar.markdown(f"**Classes :** {', '.join(id2label.values())}")
 st.sidebar.markdown(f"**Device :** {DEVICE}")
 
+# ------------------------------------------------------------------
 # Page principale
+# ------------------------------------------------------------------
 st.title("🚗 Detecteur de dommages vehicules")
 st.markdown(
     "Uploadez une image pour obtenir une prediction "
     "avec score de confiance et visualisation GradCAM."
 )
 
+# Section "Comment ca marche ?" (point 3)
+with st.expander("ℹ️ Comment ca marche ?"):
+    st.markdown("""
+    **Objectif** : aider les experts en assurance a pre-evaluer rapidement si un vehicule
+    presente des dommages visibles, a partir d'une simple photo.
+
+    **Modele utilise** : MobileNet-V2, un reseau de neurones convolutif (CNN)
+    pre-entraine sur ImageNet (14 millions d'images) puis affine sur un dataset
+    de photos de vehicules endommages et intacts.
+
+    **Comment lire les resultats** :
+    - 🟢 **Confiance elevee (≥ 85%)** : la prediction est tres probable
+    - 🟡 **Confiance moderee (65 - 85%)** : la prediction est probable mais a verifier
+    - 🔴 **Confiance faible (< 65%)** : le modele hesite, expertise humaine recommandee
+
+    **Heatmap GradCAM** : les zones rouge/orange indiquent ou le modele a "regarde"
+    pour prendre sa decision. Si la heatmap se concentre sur la zone endommagee,
+    la prediction est fiable. Si elle pointe ailleurs (arriere-plan, ciel...),
+    la prediction doit etre remise en question.
+
+    **Limites** :
+    - Le modele a ete entraine sur des photos standard. Des images floues, sombres
+      ou prises sous un angle inhabituel peuvent reduire la fiabilite.
+    - Le modele ne quantifie pas le cout des reparations, il indique seulement
+      la presence de dommages visibles.
+    - Cette application est un outil d'aide a la decision et ne remplace en
+      aucun cas l'expertise d'un professionnel.
+    """)
+
+# ------------------------------------------------------------------
+# Upload d'image
+# ------------------------------------------------------------------
 uploaded_file = st.file_uploader(
     "Choisir une image",
     type=["jpg", "jpeg", "png"],
@@ -106,7 +154,8 @@ if uploaded_file is not None:
             rgb_img = np.array(img_resized).astype(np.float32) / 255.0
             gradcam_overlay = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
 
-        is_damaged = "damage" in pred_label.lower() and "not" not in pred_label.lower()
+        # ----- Affichage de la prediction -----
+        is_damaged = "damage" in pred_label.lower() and "not" not in pred_label.lower() and "whole" not in pred_label.lower()
         icon = "🔴" if is_damaged else "🟢"
         st.metric(
             label="Prediction",
@@ -114,17 +163,11 @@ if uploaded_file is not None:
             delta=f"{confidence:.1f}% de confiance"
         )
 
-        st.markdown("**Probabilites par classe :**")
-        for i, p in enumerate(probs):
-            st.progress(float(p), text=f"{id2label[i]} : {p*100:.1f}%")
+        # ----- Indicateur visuel de confiance (point 1) -----
+        conf_emoji, conf_level, conf_color = get_confidence_info(confidence)
+        st.markdown(f"**Niveau de confiance** : {conf_emoji} {conf_level}")
+        st.progress(int(confidence), text=f"{confidence:.1f}%")
 
-        st.image(gradcam_overlay, caption="Heatmap GradCAM — zones regardees par le modele",
-                 use_container_width=True)
-
-    st.markdown("---")
-    st.warning(
-        "⚠️ Pre-evaluation automatique — l'avis d'un expert reste necessaire "
-        "pour la validation du sinistre."
-    )
-else:
-    st.info("👆 Uploadez une image pour commencer l'analyse.")
+        # Message contextuel selon la confiance
+        if confidence >= 85:
+            st.success("Le mo
